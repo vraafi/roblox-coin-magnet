@@ -1,0 +1,62 @@
+{
+ "tri_layer": true,
+ "lulus": true,
+ "sah": true,
+ "vonis": "terima",
+ "bounce_ke": null,
+ "ringkas": "semua lapis lulus",
+ "lapis": {
+  "kode": {
+   "lapis": "kode",
+   "lulus": true,
+   "sah": true,
+   "vonis": "terima",
+   "temuan": [],
+   "catatan": [
+    "camus tidak dijalankan: target bukan proyek Node"
+   ],
+   "pembuat": "project-executor",
+   "peninjau": "quality-control-panel",
+   "camus": {
+    "ok": false,
+    "sah": false,
+    "tidak_berlaku": true,
+    "sebab": "target bukan proyek Node (tanpa package.json) — camus tidak berlaku"
+   },
+   "jumlah_berkas": {
+    "py": 0,
+    "js": 0,
+    "json": 1,
+    "lua": 1,
+    "lain": 1
+   },
+   "jumlah_diperiksa": 3,
+   "detik": 1.16,
+   "diperiksa": "2026-11-03T14:04:02+07:00"
+  },
+  "visual": {
+   "lapis": "visual",
+   "tidak_berlaku": true,
+   "lulus": true,
+   "sah": null,
+   "vonis": "tidak berlaku",
+   "temuan": [],
+   "sebab": "tidak ada URL UI",
+   "diperiksa": "2026-11-03T14:04:02+07:00"
+  },
+  "pengguna": {
+   "lapis": "pengguna",
+   "tidak_berlaku": true,
+   "lulus": true,
+   "sah": null,
+   "vonis": "tidak berlaku",
+   "temuan": [],
+   "sebab": "tidak ada URL UI",
+   "diperiksa": "2026-11-03T14:04:02+07:00"
+  }
+ },
+ "detik": 1.16,
+ "diperiksa": "2026-11-03T14:04:02+07:00",
+ "target": "C:\\Users\\user\\otonom-penuh\\workspace\\trust-test\\roblox-coin-magnet",
+ "url": null
+}

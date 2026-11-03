@@ -1,0 +1,11 @@
+{
+  "magnetRadius": 25,
+  "magnetDuration": 8,
+  "magnetStrength": 60,
+  "maxCoinsPerPlayer": 100,
+  "coinCooldown": 5,
+  "collectRadius": 4,
+  "spawnInterval": 3,
+  "autoSpawn": true,
+  "maxActiveCoins": 50
+}
