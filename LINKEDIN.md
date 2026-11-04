@@ -1,7 +1,9 @@
-Coin Magnet selesai. QC berjalan 1,16 detik. Dua lapis aktif lulus. Temuan nol. Tiga berkas: CoinMagnet.lua 10067 B, config.json 221 B, README.md 3583 B.
+Kami kirim Coin Magnet dengan QC 0,61 detik dan 0 temuan. Lapis kode aktif dan lulus. Tidak ada klaim di luar itu.
 
-Fungsinya jelas: magnet menarik koin dalam radius, batas per pemain menjaga ekonomi, koin kembali setelah cooldown. Parameter dipisah ke config.json supaya tim bisa menyesuaikan tanpa menyentuh logika Luau.
+Produknya kolektibel koin Roblox. Magnet menarik koin dalam radius. Batas per pemain menjaga keseimbangan. Koin kembali setelah cooldown. Logika ada di CoinMagnet.lua, parameter di config.json, panduan di README.md.
 
-Kami tidak mengklaim lebih dari yang diuji. QC ini mencakup lapis kode. Uji beban dan produksi menyusul.
+Keputusan kami: angka QC jadi dasar rilis, bukan perasaan. Kami pisahkan konfigurasi dari kode agar perubahan radius, batas, dan cooldown tidak menyentuh logika inti. Hasilnya 1 berkas Lua, 2 JSON, dan 4 berkas lain, semua terhitung.
 
-Baca README lalu jalankan QC yang sama di环境 Anda. #Roblox #Luau #QC
+Batasannya jelas: QC ini hanya lapis kode. Uji beban dan uji main langsung belum masuk hitungan.
+
+Langkah berikut: jalankan uji main langsung dan laporkan angka radius serta cooldown final. #Roblox #Luau #QC

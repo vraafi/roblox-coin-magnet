@@ -1,1 +1,3 @@
-['Menjalankan QC 1,16 detik dengan 2 lapis aktif dan 0 temuan.', 'Mengirim 3 berkas: CoinMagnet.lua 10067 B, config.json 221 B, README.md 3583 B.', 'Memisahkan parameter magnet ke config.json: 1 berkas JSON, 1 berkas Lua.']
+- Membangun Coin Magnet Luau dengan radius, batas pemain, dan cooldown koin.
+- Menjalankan QC kode 0,61 detik dengan 0 temuan pada lapis kode.
+- Menyiapkan 3 berkas hasil: Lua 6197 B, JSON 221 B, README 2087 B.

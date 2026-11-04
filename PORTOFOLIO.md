@@ -1,14 +1,14 @@
 ## Masalah
-Koin di Roblox sering tersebar dan pemain kehilangan waktu untuk mengumpulkannya. Power-up magnet menjanjikan pengalaman yang lebih cepat, tetapi tanpa batas per pemain dan mekanisme pemulihan, ekonomi game mudah rusak.
+Koin di pengalaman Roblox tercecer dan tidak menarik. Pemain mengejar koin satu per satu. Retensi turun karena loop koleksi terasa lambat.
 
 ## Yang Dibangun
-Coin Magnet: sistem kolektibel koin dengan power-up magnet di Luau. Magnet menarik koin dalam radius. Setiap pemain punya batas tarikan. Koin kembali setelah cooldown. Berkas hasil: `CoinMagnet.lua` (10067 B), `config.json` (221 B), `README.md` (3583 B).
+Coin Magnet: kolektibel koin dengan power-up magnet di Luau. Magnet menarik koin dalam radius. Ada batas per pemain. Koin kembali setelah cooldown. Berkas hasil: CoinMagnet.lua (6197 B), config.json (221 B), README.md (2087 B).
 
 ## Keputusan Teknis
-Logika inti di Luau. Parameter radius, batas per pemain, dan cooldown dipisah ke `config.json` agar bisa diubah tanpa menyentuh kode. README memuat cara pakai dan batasan. Struktur ini menjaga perubahan tetap terkontrol.
+Logika magnet dipisah ke satu modul Luau agar mudah diuji. Parameter radius, batas, dan cooldown ditaruh di config.json, bukan hardcode. README memuat cara pasang dan cara ubah parameter. Struktur ini menjaga perubahan perilaku tetap di satu berkas konfigurasi.
 
 ## Bukti
-QC berjalan 1.16 detik. Dua lapis aktif: kode dan lulus. Temuan: 0. Rincian berkas: 0 Python, 0 JS, 1 JSON, 1 Lua, 1 lain. Semua lapis aktif lulus.
+QC berjalan 0,61 detik. Lapis aktif: kode. Lapis lulus: kode. Temuan: 0. Rincian berkas: 1 Lua, 2 JSON, 0 Python, 0 JavaScript, 4 lain.
 
 ## Batasan
-QC hanya mencakup lapis kode. Uji beban pemain banyak dan pengujian di server produksi belum termasuk. Angka 1.16 detik adalah waktu QC, bukan waktu muat di game.
+Fakta QC hanya mencakup lapis kode. Uji beban pemain banyak dan uji main langsung belum tercatat di fakta ini. Angka retensi dan pendapatan tidak tersedia dan tidak diklaim.

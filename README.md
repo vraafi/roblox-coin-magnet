@@ -1,95 +1,57 @@
-# Coin Magnet (Luau / Roblox)
+# Coin Magnet
 
-Modul kolektibel koin dengan magnet power-up. Menarik koin dalam radius pemain, membatasi koin per pemain, dan mengembalikan koin setelah cooldown.
-
-## Fitur
-
-- Satu `ModuleScript` yang mengembalikan tabel dengan `.new(config)`.
-- `game:GetService(...)` untuk service, tanpa `wait()` (memakai `task.wait` / `RunService.Heartbeat`).
-- Semua koneksi event dibersihkan di `:Destroy()` (bebas memory leak).
-- Konfigurasi angka & boolean via `config.json`.
-- Gaya Luau modern + anotasi tipe opsional, `selene` (std=roblox) friendly.
+Modul Luau untuk Roblox yang membuat koin kolektibel dengan efek magnet: koin dalam radius pemain akan tertarik dan dikumpulkan, dengan batas per pemain dan cooldown respawn.
 
 ## Cara Pakai
 
-1. Letakkan `CoinMagnet.lua` di `ReplicatedStorage` sebagai `ModuleScript` dengan nama `CoinMagnet`.
-2. Letakkan `config.json` di `ReplicatedStorage/CoinMagnetConfig` (opsional) — atau inline config di script.
-3. Di server script:
+1. Letakkan `CoinMagnet.lua` sebagai `ModuleScript` di `ServerScriptService` atau `ReplicatedStorage`.
+2. Tandai part koin dengan tag `CoinMagnet_Coin` menggunakan `CollectionService:AddTag(part, "CoinMagnet_Coin")`.
+3. Buat Script server yang me-require modul dan memanggil `CoinMagnet.new(config)`.
 
 ```lua
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CoinMagnet = require(ReplicatedStorage:WaitForChild("CoinMagnet"))
+local CoinMagnet = require(script.Parent.CoinMagnet)
+local CollectionService = game:GetService("CollectionService")
 
-local config = {
+-- Tandai koin
+for _, coin in ipairs(workspace.Coins:GetChildren()) do
+    if coin:IsA("BasePart") then
+        CollectionService:AddTag(coin, "CoinMagnet_Coin")
+    end
+end
+
+local magnet = CoinMagnet.new({
     magnetRadius = 25,
-    magnetDuration = 8,
     magnetStrength = 60,
-    maxCoinsPerPlayer = 100,
-    coinCooldown = 5,
-    collectRadius = 4,
-    spawnInterval = 3,
-    autoSpawn = true,
-    maxActiveCoins = 50,
-}
+    maxCoinsPerPlayer = 10,
+    coinRespawnCooldown = 5,
+    updateInterval = 0.1,
+})
 
-local module = CoinMagnet.new(config)
-module:SetupCoin(someCoinModel)   -- daftarkan model koin yang sudah ada
-module:AddCoin(Vector3.new(0, 3, 0)) -- spawn koin baru
-
--- Berikan efek magnet ke pemain
-somePlayer.CharacterAdded:Connect(function() end)
-module:GrantMagnet(somePlayer)
-
-module:Start() -- aktifkan Heartbeat loop
-
--- Saat unload/cleanup:
--- module:Destroy()
+-- Saat selesai:
+-- magnet:Destroy()
 ```
 
-## Contoh Pemasangan (StarterScript di ServerScriptService)
+## Parameter config.json
 
-```lua
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local CoinMagnet = require(ReplicatedStorage:WaitForChild("CoinMagnet"))
+| Kunci | Tipe | Default | Deskripsi |
+|-------|------|---------|-----------|
+| `magnetRadius` | number | 25 | Radius tarik magnet (studs) |
+| `magnetStrength` | number | 60 | Kecepatan tarik koin |
+| `maxCoinsPerPlayer` | number | 10 | Batas koin terkumpul per pemain |
+| `coinRespawnCooldown` | number | 5 | Waktu respawn koin (detik) |
+| `updateInterval` | number | 0.1 | Interval update Heartbeat (detik) |
 
-local cfg = {
-    magnetRadius = 20,
-    magnetDuration = 10,
-    magnetStrength = 40,
-    maxCoinsPerPlayer = 50,
-    coinCooldown = 6,
-    collectRadius = 5,
-    spawnInterval = 4,
-    autoSpawn = true,
-    maxActiveCoins = 30,
-}
+## Pemasangan
 
-local coinMagnet = CoinMagnet.new(cfg)
-coinMagnet:Start()
+- Modul harus dijalankan di server.
+- Koin harus berupa `BasePart` yang diberi tag `CoinMagnet_Coin`.
+- Pemain harus memiliki `HumanoidRootPart` di karakter.
+- Panggil `:Destroy()` untuk membersihkan koneksi dan state.
 
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(char)
-        local hrp = char:WaitForChild("HumanoidRootPart")
-        coinMagnet:AddCoin(hrp.Position + Vector3.new(0, 2, 0))
-    end)
-end)
+## Batasan
 
--- Berikan magnet ke pemain saat sentuh power-up khusus:
--- coinMagnet:GrantMagnet(player)
-```
-
-## Batasan / Catatan
-
-- Magnet hanya menarik koin yang sudah terdaftar via `SetupCoin` atau dibuat via `AddCoin`.
-- Mode koin: model koin harus punya `PrimaryPart` atau `BasePart` anak untuk deteksi `Touched`.
-- `Touched` dipakai untuk deteksi koleksi — untuk skala besar disarankan ganti ke spatial query (`Workspace:GetPartBoundsInRadius`) di modifikasi lanjutan.
-- `autoSpawn` memakai posisi acak dalam kotak ±50 unit di sekitar origin; sesuaikan secara manual dengan mengganti `_spawnTick` (fork).
-- Efek magnet tidak direplikasi visual secara otomatis; perlu `RemoteEvent` tambahan jika klien butuh feedback.
-- `maxCoinsPerPlayer` adalah hitungan koin yang sedang dikumpulkan (belum cooldown kembali); reset parsial terjadi saat cooldown koin selesai.
-- Tidak memakai `task.wait()` di dalam modul; loop berjalan di `RunService.Heartbeat` sehingga performa stabil.
-- Module ini server-only. Jangan `require` di `LocalScript` untuk logika otoritatif.
-
-## Versi Selene
-
-Disarankan: `selene --config selene.toml CoinMagnet.lua` dengan `std = "roblox"`.
+- Hanya mendukung `BasePart` sebagai koin.
+- Tidak ada replikasi efek visual khusus; koin hanya dipindahkan secara fisik.
+- Cooldown respawn bersifat global per koin, bukan per pemain.
+- Batas `maxCoinsPerPlayer` dihitung dari koin yang masih dalam status terkumpul.
+- Tidak menangani kasus koin dihapus permanen saat terkumpul.

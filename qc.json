@@ -13,7 +13,8 @@
    "vonis": "terima",
    "temuan": [],
    "catatan": [
-    "camus tidak dijalankan: target bukan proyek Node"
+    "camus tidak dijalankan: target bukan proyek Node",
+    "CoinMagnet.lua: CoinMagnet.lua:8:7 warning[unused_variable] Workspace is assigned a value, but never used"
    ],
    "pembuat": "project-executor",
    "peninjau": "quality-control-panel",
@@ -26,13 +27,13 @@
    "jumlah_berkas": {
     "py": 0,
     "js": 0,
-    "json": 1,
+    "json": 2,
     "lua": 1,
-    "lain": 1
+    "lain": 4
    },
-   "jumlah_diperiksa": 3,
-   "detik": 1.16,
-   "diperiksa": "2026-11-03T14:04:02+07:00"
+   "jumlah_diperiksa": 7,
+   "detik": 0.61,
+   "diperiksa": "2026-11-04T21:26:52+07:00"
   },
   "visual": {
    "lapis": "visual",
@@ -42,7 +43,7 @@
    "vonis": "tidak berlaku",
    "temuan": [],
    "sebab": "tidak ada URL UI",
-   "diperiksa": "2026-11-03T14:04:02+07:00"
+   "diperiksa": "2026-11-04T21:26:52+07:00"
   },
   "pengguna": {
    "lapis": "pengguna",
@@ -52,11 +53,18 @@
    "vonis": "tidak berlaku",
    "temuan": [],
    "sebab": "tidak ada URL UI",
-   "diperiksa": "2026-11-03T14:04:02+07:00"
+   "diperiksa": "2026-11-04T21:26:52+07:00"
   }
  },
- "detik": 1.16,
- "diperiksa": "2026-11-03T14:04:02+07:00",
+ "override_deterministik": {
+  "diterapkan": false,
+  "hijau": true,
+  "dibatalkan": [],
+  "bertahan": [],
+  "catatan": ""
+ },
+ "detik": 0.61,
+ "diperiksa": "2026-11-04T21:26:52+07:00",
  "target": "C:\\Users\\user\\otonom-penuh\\workspace\\trust-test\\roblox-coin-magnet",
  "url": null
 }
