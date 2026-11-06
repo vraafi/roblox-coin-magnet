@@ -1,248 +1,121 @@
---!strict
--- CoinMagnet ModuleScript
--- Modern Luau, no globals, no wait(), cleans up connections.
+-- CoinMagnet.lua
+-- ModuleScript for Roblox Coin Magnet power-up
 
-local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
-local Workspace = game:GetService("Workspace")
 
-local COIN_TAG = "CoinMagnet_Coin"
-
-type Config = {
-	magnetRadius: number?,
-	magnetStrength: number?,
-	maxCoinsPerPlayer: number?,
-	coinRespawnCooldown: number?,
-	updateInterval: number?,
-}
-
-type CoinState = {
-	part: BasePart,
-	originalParent: Instance?,
-	originalCFrame: CFrame,
-	collected: boolean,
-	respawnAt: number?,
-	owner: Player?,
-}
-
-type PlayerState = {
-	collectedCount: number,
+-- Default configuration (can be overridden by config.json)
+local defaultConfig = {
+    radius = 20,            -- Radius within which coins are attracted
+    cooldown = 5,           -- Seconds before a collected coin respawns
+    maxPerPlayer = 3,       -- Max number of coins a player can hold at once
+    attractionSpeed = 50,   -- Speed at which coins move towards the player
+    enabled = true          -- Global toggle for the module
 }
 
 local CoinMagnet = {}
 CoinMagnet.__index = CoinMagnet
 
-local DEFAULTS: Config = {
-	magnetRadius = 25,
-	magnetStrength = 60,
-	maxCoinsPerPlayer = 10,
-	coinRespawnCooldown = 5,
-	updateInterval = 0.1,
-}
-
-local function validateConfig(cfg: Config?): Config
-	local out: Config = {}
-	if cfg then
-		for k, v in pairs(cfg) do
-			if type(v) == "number" or type(v) == "boolean" then
-				(out :: any)[k] = v
-			end
-		end
-	end
-	for k, v in pairs(DEFAULTS) do
-		if (out :: any)[k] == nil then
-			(out :: any)[k] = v
-		end
-	end
-	return out
+-- Helper to find all coins in the workspace
+local function getAllCoins()
+    local coins = {}
+    for _, part in ipairs(workspace:GetDescendants()) do
+        if part:IsA("BasePart") and CollectionService:HasTag(part, "Coin") then
+            table.insert(coins, part)
+        end
+    end
+    return coins
 end
 
-function CoinMagnet.new(config: Config?)
-	local self = setmetatable({}, CoinMagnet)
-	self._config = validateConfig(config)
-	self._connections = {}
-	self._coins = {} :: { [BasePart]: CoinState }
-	self._playerStates = {} :: { [Player]: PlayerState }
-	self._destroyed = false
-	self._accum = 0
-
-	self:_initCoins()
-
-	table.insert(self._connections, CollectionService:GetInstanceAddedSignal(COIN_TAG):Connect(function(inst)
-		self:_registerCoin(inst)
-	end))
-	table.insert(self._connections, CollectionService:GetInstanceRemovedSignal(COIN_TAG):Connect(function(inst)
-		self:_unregisterCoin(inst)
-	end))
-
-	table.insert(self._connections, RunService.Heartbeat:Connect(function(dt)
-		self:_step(dt)
-	end))
-
-	table.insert(self._connections, Players.PlayerRemoving:Connect(function(player)
-		self._playerStates[player] = nil
-		for _, state in pairs(self._coins) do
-			if state.owner == player then
-				state.owner = nil
-			end
-		end
-	end))
-
-	return self
+-- Helper to move a coin towards a target position
+local function moveCoinTowards(coin, targetPos, speed, deltaTime)
+    local direction = (targetPos - coin.Position).Unit
+    local newPos = coin.Position + direction * speed * deltaTime
+    coin.CFrame = CFrame.new(newPos)
 end
 
-function CoinMagnet:_registerCoin(inst: Instance)
-	if not inst:IsA("BasePart") then
-		return
-	end
-	local part = inst :: BasePart
-	if self._coins[part] then
-		return
-	end
-	self._coins[part] = {
-		part = part,
-		originalParent = part.Parent,
-		originalCFrame = part.CFrame,
-		collected = false,
-		respawnAt = nil,
-		owner = nil,
-	}
+-- CoinMagnet constructor
+function CoinMagnet.new(config)
+    local self = setmetatable({}, CoinMagnet)
+    self.config = config or {}
+    for k, v in pairs(defaultConfig) do
+        if self.config[k] == nil then
+            self.config[k] = v
+        end
+    end
+
+    self.players = {}
+    self.connections = {}
+    self.active = self.config.enabled
+
+    -- Heartbeat loop
+    local heartbeatConn = RunService.Heartbeat:Connect(function(dt)
+        if not self.active then return end
+        for player, data in pairs(self.players) do
+            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = player.Character.HumanoidRootPart
+                local coins = getAllCoins()
+                for _, coin in ipairs(coins) do
+                    if not coin:GetAttribute("Collected") then
+                        local dist = (coin.Position - hrp.Position).Magnitude
+                        if dist <= self.config.radius then
+                            moveCoinTowards(coin, hrp.Position, self.config.attractionSpeed, dt)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    table.insert(self.connections, heartbeatConn)
+
+    return self
 end
 
-function CoinMagnet:_unregisterCoin(inst: Instance)
-	if inst:IsA("BasePart") then
-		self._coins[inst :: BasePart] = nil
-	end
+-- Activate magnet for a player
+function CoinMagnet:AddPlayer(player)
+    if not player or self.players[player] then return end
+    self.players[player] = {coinsHeld = 0}
+
+    -- Listen for coin collection via tag
+    local collectConn = CollectionService:GetInstanceAddedSignal("CoinCollected"):Connect(function(coin, collector)
+        if collector == player then
+            if self.players[player].coinsHeld < self.config.maxPerPlayer then
+                self.players[player].coinsHeld = self.players[player].coinsHeld + 1
+                coin:SetAttribute("Collected", true)
+                -- Disable coin physics
+                coin.CanCollide = false
+                coin.Anchored = true
+                -- Respawn after cooldown
+                task.delay(self.config.cooldown, function()
+                    if coin then
+                        coin.Position = coin:GetAttribute("OriginalPosition") or coin.Position
+                        coin.CanCollide = true
+                        coin.Anchored = false
+                        coin:SetAttribute("Collected", false)
+                    end
+                end)
+            end
+        end
+    end)
+    table.insert(self.connections, collectConn)
 end
 
-function CoinMagnet:_initCoins()
-	for _, inst in ipairs(CollectionService:GetTagged(COIN_TAG)) do
-		self:_registerCoin(inst)
-	end
+-- Deactivate magnet for a player
+function CoinMagnet:RemovePlayer(player)
+    if not player or not self.players[player] then return end
+    self.players[player] = nil
 end
 
-function CoinMagnet:_getPlayerState(player: Player): PlayerState
-	local st = self._playerStates[player]
-	if not st then
-		st = { collectedCount = 0 }
-		self._playerStates[player] = st
-	end
-	return st
-end
-
-function CoinMagnet:_step(dt: number)
-	if self._destroyed then
-		return
-	end
-	self._accum += dt
-	local interval = self._config.updateInterval or DEFAULTS.updateInterval :: number
-	if self._accum < interval then
-		return
-	end
-	self._accum = 0
-
-	local now = os.clock()
-
-	-- Respawn collected coins
-	for part, state in pairs(self._coins) do
-		if state.collected and state.respawnAt and now >= state.respawnAt then
-			if part.Parent == nil and state.originalParent then
-				part.CFrame = state.originalCFrame
-				part.Parent = state.originalParent
-			end
-			state.collected = false
-			state.respawnAt = nil
-			state.owner = nil
-		end
-	end
-
-	-- Magnet each player's nearby coins
-	local radius = self._config.magnetRadius or DEFAULTS.magnetRadius :: number
-	local strength = self._config.magnetStrength or DEFAULTS.magnetStrength :: number
-	local maxCoins = self._config.maxCoinsPerPlayer or DEFAULTS.maxCoinsPerPlayer :: number
-	local cooldown = self._config.coinRespawnCooldown or DEFAULTS.coinRespawnCooldown :: number
-
-	for _, player in ipairs(Players:GetPlayers()) do
-		local character = player.Character
-		if not character then
-			continue
-		end
-		local hrp = character:FindFirstChild("HumanoidRootPart")
-		if not hrp or not hrp:IsA("BasePart") then
-			continue
-		end
-		local origin = hrp.Position
-		local pstate = self:_getPlayerState(player)
-
-		for part, state in pairs(self._coins) do
-			if state.collected then
-				continue
-			end
-			if part.Parent == nil then
-				continue
-			end
-			if pstate.collectedCount >= maxCoins then
-				break
-			end
-
-			local delta = origin - part.Position
-			local dist = delta.Magnitude
-			if dist > radius then
-				continue
-			end
-
-			if dist < 3 then
-				-- Collect
-				state.collected = true
-				state.owner = player
-				state.respawnAt = now + cooldown
-				state.originalCFrame = part.CFrame
-				pstate.collectedCount += 1
-				if state.originalParent then
-					part.Parent = nil
-				else
-					part.CFrame = state.originalCFrame
-				end
-			else
-				-- Attract
-				local step = math.min(dist, strength * interval)
-				local newPos = part.Position + delta.Unit * step
-				part.CFrame = CFrame.new(newPos) * (part.CFrame - part.Position)
-			end
-		end
-	end
-
-	-- Decay collected count gradually when no longer collecting
-	for _, player in ipairs(Players:GetPlayers()) do
-		local pstate = self._playerStates[player]
-		if pstate and pstate.collectedCount > 0 then
-			local active = false
-			for _, state in pairs(self._coins) do
-				if state.owner == player and state.collected then
-					active = true
-					break
-				end
-			end
-			if not active then
-				pstate.collectedCount = math.max(0, pstate.collectedCount - 1)
-			end
-		end
-	end
-end
-
+-- Destroy the module and clean up connections
 function CoinMagnet:Destroy()
-	if self._destroyed then
-		return
-	end
-	self._destroyed = true
-	for _, conn in ipairs(self._connections) do
-		conn:Disconnect()
-	end
-	table.clear(self._connections)
-	table.clear(self._coins)
-	table.clear(self._playerStates)
-	setmetatable(self, nil)
+    for _, conn in ipairs(self.connections) do
+        if conn and conn.Connected then
+            conn:Disconnect()
+        end
+    end
+    self.connections = {}
+    self.players = {}
+    self.active = false
 end
 
 return CoinMagnet

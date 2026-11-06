@@ -1,57 +1,13 @@
-# Coin Magnet
+# Coin Magnet Module
 
-Modul Luau untuk Roblox yang membuat koin kolektibel dengan efek magnet: koin dalam radius pemain akan tertarik dan dikumpulkan, dengan batas per pemain dan cooldown respawn.
+This module provides a **Coin Magnet** power‑up for Roblox games. When activated, a player will attract nearby coins within a configurable radius. Collected coins are temporarily disabled and respawn after a cooldown.
 
-## Cara Pakai
+## Installation
 
-1. Letakkan `CoinMagnet.lua` sebagai `ModuleScript` di `ServerScriptService` atau `ReplicatedStorage`.
-2. Tandai part koin dengan tag `CoinMagnet_Coin` menggunakan `CollectionService:AddTag(part, "CoinMagnet_Coin")`.
-3. Buat Script server yang me-require modul dan memanggil `CoinMagnet.new(config)`.
+1. **Create a ModuleScript** in `ReplicatedStorage` (or any suitable location) and paste the contents of `CoinMagnet.lua`.
+2. **Add a configuration file** (`config.json`) to the same folder or load it from a `DataStore`/`ServerScriptService`.
+3. **Tag your coin parts** with the `Coin` tag using `CollectionService`.
+4. **Trigger the power‑up** by calling `AddPlayer` when the player obtains the magnet.
 
 ```lua
-local CoinMagnet = require(script.Parent.CoinMagnet)
-local CollectionService = game:GetService("CollectionService")
-
--- Tandai koin
-for _, coin in ipairs(workspace.Coins:GetChildren()) do
-    if coin:IsA("BasePart") then
-        CollectionService:AddTag(coin, "CoinMagnet_Coin")
-    end
-end
-
-local magnet = CoinMagnet.new({
-    magnetRadius = 25,
-    magnetStrength = 60,
-    maxCoinsPerPlayer = 10,
-    coinRespawnCooldown = 5,
-    updateInterval = 0.1,
-})
-
--- Saat selesai:
--- magnet:Destroy()
-```
-
-## Parameter config.json
-
-| Kunci | Tipe | Default | Deskripsi |
-|-------|------|---------|-----------|
-| `magnetRadius` | number | 25 | Radius tarik magnet (studs) |
-| `magnetStrength` | number | 60 | Kecepatan tarik koin |
-| `maxCoinsPerPlayer` | number | 10 | Batas koin terkumpul per pemain |
-| `coinRespawnCooldown` | number | 5 | Waktu respawn koin (detik) |
-| `updateInterval` | number | 0.1 | Interval update Heartbeat (detik) |
-
-## Pemasangan
-
-- Modul harus dijalankan di server.
-- Koin harus berupa `BasePart` yang diberi tag `CoinMagnet_Coin`.
-- Pemain harus memiliki `HumanoidRootPart` di karakter.
-- Panggil `:Destroy()` untuk membersihkan koneksi dan state.
-
-## Batasan
-
-- Hanya mendukung `BasePart` sebagai koin.
-- Tidak ada replikasi efek visual khusus; koin hanya dipindahkan secara fisik.
-- Cooldown respawn bersifat global per koin, bukan per pemain.
-- Batas `maxCoinsPerPlayer` dihitung dari koin yang masih dalam status terkumpul.
-- Tidak menangani kasus koin dihapus permanen saat terkumpul.
+local CoinMagnet = require(game.ReplicatedStorage.C

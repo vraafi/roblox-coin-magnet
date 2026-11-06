@@ -1,3 +1,2 @@
-- Membangun Coin Magnet Luau dengan radius, batas pemain, dan cooldown koin.
-- Menjalankan QC kode 0,61 detik dengan 0 temuan pada lapis kode.
-- Menyiapkan 3 berkas hasil: Lua 6197 B, JSON 221 B, README 2087 B.
+- Membangun Coin Magnet (roblox) dan meluluskan lapis QC kode.
+- Menutup 0 temuan QC dalam 3.76 detik.

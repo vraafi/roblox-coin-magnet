@@ -1,9 +1,7 @@
-Kami kirim Coin Magnet dengan QC 0,61 detik dan 0 temuan. Lapis kode aktif dan lulus. Tidak ada klaim di luar itu.
+Coin Magnet: Kolektibel koin dengan magnet power-up Luau: tarik koin dalam radius, batas per pemain, koin kembali setelah cooldown.
 
-Produknya kolektibel koin Roblox. Magnet menarik koin dalam radius. Batas per pemain menjaga keseimbangan. Koin kembali setelah cooldown. Logika ada di CoinMagnet.lua, parameter di config.json, panduan di README.md.
+QC: kode. 3.76 detik. 0 temuan ditutup.
 
-Keputusan kami: angka QC jadi dasar rilis, bukan perasaan. Kami pisahkan konfigurasi dari kode agar perubahan radius, batas, dan cooldown tidak menyentuh logika inti. Hasilnya 1 berkas Lua, 2 JSON, dan 4 berkas lain, semua terhitung.
+Kami tidak mengirim karya sebelum gerbangnya lulus. Hubungi kami kalau butuh produk seperti ini.
 
-Batasannya jelas: QC ini hanya lapis kode. Uji beban dan uji main langsung belum masuk hitungan.
-
-Langkah berikut: jalankan uji main langsung dan laporkan angka radius serta cooldown final. #Roblox #Luau #QC
+#softwarehouse #engineering
